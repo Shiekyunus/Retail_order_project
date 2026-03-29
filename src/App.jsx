@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+<<<<<<< HEAD
 import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 
@@ -50,6 +51,35 @@ function App() {
         </div>
       </Router>
     </CartProvider>
+=======
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Menu from './pages/Menu';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import MemberPlaceholder from './components/MemberPlaceholder';
+
+function App() {
+  return (
+    <Router>
+      <div className="app-container">
+        <Navbar />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/menu" element={<Menu />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            {/* The Cart and Orders interface is bounded for Member 2 */}
+            <Route path="/cart" element={<MemberPlaceholder moduleName="Cart & Checkout" />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+>>>>>>> 600a81f2 (add at frontend member1 pages)
   );
 }
 
