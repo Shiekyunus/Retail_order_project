@@ -15,10 +15,13 @@ const Order = () => {
   // Form State
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     phone: '',
     address: '',
     city: '',
-    pincode: ''
+    pincode: '',
+    paymentMode: 'credit', // 'credit', 'upi', 'netbanking'
+    paymentDetails: '' // To hold fake card/upi ID
   });
 
   const [errors, setErrors] = useState({});
@@ -31,6 +34,11 @@ const Order = () => {
   const validateForm = () => {
     let formErrors = {};
     if (!formData.name.trim()) formErrors.name = 'Name is required';
+    if (!formData.email.trim()) {
+      formErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      formErrors.email = 'Email is invalid';
+    }
     if (!formData.phone.trim()) {
       formErrors.phone = 'Phone is required';
     } else if (!/^\d{10}$/.test(formData.phone)) {
@@ -39,26 +47,45 @@ const Order = () => {
     if (!formData.address.trim()) formErrors.address = 'Address is required';
     if (!formData.city.trim()) formErrors.city = 'City is required';
     if (!formData.pincode.trim()) formErrors.pincode = 'Pincode is required';
+    
+    if (formData.paymentMode === 'credit' && !formData.paymentDetails.trim()) {
+      formErrors.paymentDetails = 'Card Number is required';
+    } else if (formData.paymentMode === 'upi' && !formData.paymentDetails.trim()) {
+      formErrors.paymentDetails = 'UPI ID is required';
+    } else if (formData.paymentMode === 'netbanking' && !formData.paymentDetails.trim()) {
+      formErrors.paymentDetails = 'Please select a bank';
+    }
 
     return formErrors;
   };
 
   const handleConfirmOrder = (e) => {
     e.preventDefault();
+    
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      alert('Please check the form for errors and fill in all required fields.');
       return;
     }
 
+    // Generate ID for history
+    const orderId = `#QB-2024-${Math.floor(Math.random() * 16777215).toString(16).toUpperCase().padStart(6, '0')}`;
+
     // Save "lastOrder" to localStorage
     const orderDetails = {
+      id: orderId,
       items: cart,
       deliveryInfo: formData,
       totalAmount: total,
       date: new Date().toISOString()
     };
     localStorage.setItem('lastOrder', JSON.stringify(orderDetails));
+
+    // Append to "ordersHistory"
+    const existingHistory = JSON.parse(localStorage.getItem('ordersHistory')) || [];
+    existingHistory.push(orderDetails);
+    localStorage.setItem('ordersHistory', JSON.stringify(existingHistory));
 
     // Clear cart and redirect
     clearCart();
@@ -91,6 +118,18 @@ const Order = () => {
               onChange={handleChange} 
             />
             {errors.name && <span className="error">{errors.name}</span>}
+          </div>
+
+          <div className="form-group">
+            <label>Email Address</label>
+            <input 
+              type="email" 
+              name="email" 
+              value={formData.email} 
+              onChange={handleChange} 
+              placeholder="For order confirmation"
+            />
+            {errors.email && <span className="error">{errors.email}</span>}
           </div>
 
           <div className="form-group">
@@ -138,6 +177,80 @@ const Order = () => {
             </div>
           </div>
 
+          <h3 className="section-title">Payment Mode</h3>
+          <div className="payment-options">
+            <label className="payment-radio">
+              <input 
+                type="radio" 
+                name="paymentMode" 
+                value="credit" 
+                checked={formData.paymentMode === 'credit'} 
+                onChange={(e) => setFormData(prev => ({...prev, paymentMode: e.target.value, paymentDetails: ''}))} 
+              />
+              Credit / Debit Card
+            </label>
+            <label className="payment-radio">
+              <input 
+                type="radio" 
+                name="paymentMode" 
+                value="upi" 
+                checked={formData.paymentMode === 'upi'} 
+                onChange={(e) => setFormData(prev => ({...prev, paymentMode: e.target.value, paymentDetails: ''}))} 
+              />
+              UPI
+            </label>
+            <label className="payment-radio">
+              <input 
+                type="radio" 
+                name="paymentMode" 
+                value="netbanking" 
+                checked={formData.paymentMode === 'netbanking'} 
+                onChange={(e) => setFormData(prev => ({...prev, paymentMode: e.target.value, paymentDetails: ''}))} 
+              />
+              Netbanking
+            </label>
+          </div>
+
+          <div className="payment-details-box form-group">
+            {formData.paymentMode === 'credit' && (
+              <>
+                <label>Card Number</label>
+                <input 
+                  type="text" 
+                  name="paymentDetails" 
+                  value={formData.paymentDetails} 
+                  onChange={handleChange} 
+                  placeholder="xxxx xxxx xxxx xxxx"
+                />
+              </>
+            )}
+            {formData.paymentMode === 'upi' && (
+              <>
+                <label>UPI ID</label>
+                <input 
+                  type="text" 
+                  name="paymentDetails" 
+                  value={formData.paymentDetails} 
+                  onChange={handleChange} 
+                  placeholder="example@upi"
+                />
+              </>
+            )}
+            {formData.paymentMode === 'netbanking' && (
+              <>
+                <label>Select Bank</label>
+                <select name="paymentDetails" value={formData.paymentDetails} onChange={handleChange}>
+                  <option value="">-- Choose your bank --</option>
+                  <option value="sbi">State Bank of India</option>
+                  <option value="hdfc">HDFC Bank</option>
+                  <option value="icici">ICICI Bank</option>
+                  <option value="axis">Axis Bank</option>
+                </select>
+              </>
+            )}
+            {errors.paymentDetails && <span className="error">{errors.paymentDetails}</span>}
+          </div>
+
           <button type="submit" className="btn-primary confirm-btn">
             Confirm Order
           </button>
@@ -150,14 +263,14 @@ const Order = () => {
             {cart.map(item => (
               <li key={item.id} className="summary-item">
                 <span>{item.quantity}x {item.name}</span>
-                <span>${(item.price * item.quantity).toFixed(2)}</span>
+                <span>₹{(item.price * item.quantity).toFixed(2)}</span>
               </li>
             ))}
           </ul>
           <div className="summary-totals">
-            <p>Subtotal: ${subtotal.toFixed(2)}</p>
-            <p>Tax: ${tax.toFixed(2)}</p>
-            <h3 className="final-total">Total: ${total.toFixed(2)}</h3>
+            <p>Subtotal: ₹{subtotal.toFixed(2)}</p>
+            <p>Tax: ₹{tax.toFixed(2)}</p>
+            <h3 className="final-total">Total: ₹{total.toFixed(2)}</h3>
           </div>
         </div>
       </div>

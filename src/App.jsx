@@ -14,6 +14,7 @@ import Register from './pages/Register';
 import Cart from './pages/Cart';
 import Order from './pages/Order';
 import Confirmation from './pages/Confirmation';
+import OrderHistory from './pages/OrderHistory';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/order" element={<Order />} />
               <Route path="/confirmation" element={<Confirmation />} />
+              <Route path="/order-history" element={<OrderHistory />} />
             </Routes>
           </main>
           <Footer />

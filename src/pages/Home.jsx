@@ -5,7 +5,7 @@ function Home() {
   return (
     <div className="home-container">
       <div className="hero-banner" style={{ backgroundColor: '#E63946', color: 'white', padding: '4rem 2rem', textAlign: 'center', borderRadius: '8px', marginBottom: '2rem' }}>
-        <h1>Order Pizza, Drinks &amp; Breads — Fast &amp; Fresh</h1>
+        <h1>QuickBite India - Fast & Fresh</h1>
         <p>Your favorite meals delivered right to your door.</p>
       </div>
       

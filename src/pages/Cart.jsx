@@ -47,7 +47,7 @@ const Cart = () => {
                       <span className="product-category">{item.category}</span>
                     </div>
                   </td>
-                  <td>${item.price.toFixed(2)}</td>
+                  <td>₹{item.price.toFixed(2)}</td>
                   <td>
                     <div className="quantity-controls">
                       <button 
@@ -62,7 +62,7 @@ const Cart = () => {
                       </button>
                     </div>
                   </td>
-                  <td>${(item.price * item.quantity).toFixed(2)}</td>
+                  <td>₹{(item.price * item.quantity).toFixed(2)}</td>
                   <td>
                     <button 
                       className="btn-remove"
@@ -85,15 +85,15 @@ const Cart = () => {
           <h3>Order Summary</h3>
           <div className="summary-row">
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>₹{subtotal.toFixed(2)}</span>
           </div>
           <div className="summary-row">
             <span>Tax (5%)</span>
-            <span>${tax.toFixed(2)}</span>
+            <span>₹{tax.toFixed(2)}</span>
           </div>
           <div className="summary-row total">
             <span>Total</span>
-            <span>${total.toFixed(2)}</span>
+            <span>₹{total.toFixed(2)}</span>
           </div>
           
           <button 

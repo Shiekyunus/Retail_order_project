@@ -11,7 +11,7 @@ function ProductCard({ product, onAddToCart }) {
         )}
       </div>
       <h3>{product.name}</h3>
-      <p style={{ color: '#E63946', fontWeight: 'bold' }}>${product.price.toFixed(2)}</p>
+      <p style={{ color: '#E63946', fontWeight: 'bold' }}>₹{product.price.toFixed(2)}</p>
       <button className="btn" onClick={() => onAddToCart(product)}>Add to Cart</button>
     </div>
   );

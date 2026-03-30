@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePDF } from 'react-to-pdf';
 import '../styles/Confirmation.css';
 
 const Confirmation = () => {
   const [order, setOrder] = useState(null);
   const navigate = useNavigate();
+  const { toPDF, targetRef } = usePDF({filename: 'quickbite-receipt.pdf'});
 
   // Generate a fake Order ID
   const generateOrderID = () => {
@@ -38,35 +40,96 @@ const Confirmation = () => {
         <h2 className="order-id">Order ID: {generateOrderID()}</h2>
       </div>
 
-      <div className="confirmation-details">
-        <div className="section delivery-address">
-          <h3>Delivery Address</h3>
-          <p><strong>Name:</strong> {deliveryInfo.name}</p>
-          <p><strong>Phone:</strong> {deliveryInfo.phone}</p>
-          <p><strong>Address:</strong> {deliveryInfo.address}, {deliveryInfo.city} - {deliveryInfo.pincode}</p>
+      <div className="receipt-invoice" ref={targetRef}>
+        <div className="receipt-header">
+          <h2>QuickBite Invoice</h2>
+          <p>Order ID: {generateOrderID()}</p>
+          <p>Date: {new Date(order.date).toLocaleDateString()}</p>
         </div>
 
-        <div className="section items-ordered">
-          <h3>Items Ordered</h3>
-          <ul>
+        <div className="receipt-customer">
+          <div className="customer-info-box">
+            <h4>Billed To:</h4>
+            <p><strong>{deliveryInfo.name}</strong></p>
+            <p>{deliveryInfo.phone}</p>
+            {deliveryInfo.email && <p>{deliveryInfo.email}</p>}
+          </div>
+          <div className="customer-delivery-box">
+            <h4>Delivery Info:</h4>
+            {order.region && <p><strong>Region:</strong> {order.region}</p>}
+            <p>{deliveryInfo.address}</p>
+            <p>{deliveryInfo.city} - {deliveryInfo.pincode}</p>
+          </div>
+        </div>
+
+        <table className="receipt-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
             {items.map(item => (
-              <li key={item.id}>
-                <span>{item.quantity}x {item.name} ({item.category})</span>
-                <span>${(item.price * item.quantity).toFixed(2)}</span>
-              </li>
+              <tr key={item.id}>
+                <td>{item.name}</td>
+                <td>{item.quantity}</td>
+                <td>₹{item.price.toFixed(2)}</td>
+                <td>₹{(item.price * item.quantity).toFixed(2)}</td>
+              </tr>
             ))}
-          </ul>
-        </div>
+          </tbody>
+        </table>
 
-        <div className="section total-paid">
-          <h3>Total Paid</h3>
-          <p className="total-amount">${totalAmount.toFixed(2)}</p>
+        <div className="receipt-summary">
+          <div className="summary-payment">
+            <h4>Payment</h4>
+            {deliveryInfo.paymentMode && (
+              <>
+                <p><strong>Mode:</strong> {deliveryInfo.paymentMode.toUpperCase()}</p>
+                {deliveryInfo.paymentDetails && (
+                  <p><strong>Details:</strong> {deliveryInfo.paymentMode === 'credit' ? `**** **** **** ${deliveryInfo.paymentDetails.slice(-4)}` : deliveryInfo.paymentDetails}</p>
+                )}
+              </>
+            )}
+          </div>
+          <div className="summary-totals-box">
+            <div className="totals-row">
+              <span>Subtotal:</span>
+              <span>₹{(totalAmount / 1.05).toFixed(2)}</span>
+            </div>
+            <div className="totals-row">
+              <span>Tax (5%):</span>
+              <span>₹{(totalAmount - (totalAmount / 1.05)).toFixed(2)}</span>
+            </div>
+            <div className="totals-row grand-total">
+              <span>Total Paid:</span>
+              <span>₹{totalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="receipt-footer">
+          <p>Thank you for choosing QuickBite!</p>
         </div>
       </div>
 
-      <button className="btn-primary btn-home" onClick={() => navigate('/')}>
-        Back to Home
-      </button>
+      {deliveryInfo.email && (
+        <div className="email-alert">
+          <p>📧 A detailed confirmation email has been sent to <strong>{deliveryInfo.email}</strong>.</p>
+        </div>
+      )}
+
+      <div className="confirmation-actions">
+        <button className="btn-secondary" onClick={() => toPDF()}>
+          📄 Download Receipt (PDF)
+        </button>
+        <button className="btn-primary" onClick={() => navigate('/')}>
+          Back to Home
+        </button>
+      </div>
     </div>
   );
 };
